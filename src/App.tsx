@@ -115,8 +115,8 @@ const columns: ColumnDef<Person>[] = [
 ];
 
 export default function App() {
-  const [data, setData] = useState(generateData(100));
-  const [toggle, setToggle] = useState(false);
+  const [data, setData] = useState(generateData(1000));
+  const [toggle, setToggle] = useState(true);
 
   return (
     <div className="flex flex-col h-screen p-4">

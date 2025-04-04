@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import DraggableVirtualTable from "./Table";
 import { ColumnDef } from "@tanstack/react-table";
+import SecondDraggableVirtualTable from "./SecondTable";
 
 // Define your data type
 type Person = {
@@ -115,7 +116,7 @@ const columns: ColumnDef<Person>[] = [
 ];
 
 export default function App() {
-  const [data, setData] = useState(generateData(1000));
+  const [data, setData] = useState(generateData(200));
   const [toggle, setToggle] = useState(true);
 
   return (
@@ -129,7 +130,7 @@ export default function App() {
       <button onClick={() => setToggle(!toggle)}>Toggle</button>
       {/* Parent container with fixed height */}
       <div className="flex-1 border rounded-md overflow-hidden">
-        <DraggableVirtualTable
+        <SecondDraggableVirtualTable
           columns={columns}
           data={data}
           onReorder={setData}

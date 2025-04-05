@@ -117,7 +117,7 @@ const columns: ColumnDef<Person>[] = [
 ];
 
 export default function App() {
-  const [data, setData] = useState(generateData(200));
+  const [data, setData] = useState(generateData(1000));
   const [toggle, setToggle] = useState(true);
 
   return (

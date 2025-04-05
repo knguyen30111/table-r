@@ -1,4 +1,10 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, {
+  useState,
+  useRef,
+  useCallback,
+  useEffect,
+  ComponentProps,
+} from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -35,7 +41,7 @@ interface VirtualizedDraggableTableProps<T> {
   overscan?: number;
 }
 
-export default function ThirdVirtualizedDraggableTable<
+export default function VirtualizedDraggableTable<
   T extends Record<string, unknown> & { id: string | number }
 >({
   columns,
@@ -47,7 +53,11 @@ export default function ThirdVirtualizedDraggableTable<
   rowHeight = 40,
   overscan = 10,
 }: VirtualizedDraggableTableProps<T>) {
+  const parentRef = useRef<HTMLDivElement>(null);
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const [draggedRowIndex, setDraggedRowIndex] = useState<number | null>(null);
+  const [overRowIndex, setOverRowIndex] = useState<number | null>(null);
 
   const table = useReactTable({
     data: data,
@@ -60,14 +70,56 @@ export default function ThirdVirtualizedDraggableTable<
     getSortedRowModel: getSortedRowModel(),
     autoResetPageIndex: false,
   });
-
   const { rows } = table.getRowModel();
-  const tableContainerRef = useRef<HTMLDivElement>(null);
+
+  // Reset sorting when drag ends to show the new manual order
+  const handleDragEnd = useCallback(
+    (event: React.DragEvent, rowIndex: number) => {
+      const draggedId = event.dataTransfer.getData("text/plain");
+
+      // Find the actual data index, considering we're looking at sorted rows
+      const rows = table.getRowModel().rows;
+      const draggedSortedIndex = rows.findIndex(
+        (row) => String(row.original.id) === draggedId
+      );
+
+      if (draggedSortedIndex !== -1 && draggedSortedIndex !== rowIndex) {
+        const newData = [...data];
+
+        // Get the actual original indices from the sorted view
+        const sourceOriginalIndex = data.findIndex(
+          (item) => String(item.id) === draggedId
+        );
+        const targetOriginalIndex = data.indexOf(rows[rowIndex].original as T);
+
+        // Perform the reordering on the original data
+        const [movedItem] = newData.splice(sourceOriginalIndex, 1);
+        newData.splice(targetOriginalIndex, 0, movedItem);
+
+        // Clear sorting to show the new manual order
+        if (sorting.length) {
+          setSorting([]);
+        }
+
+        // Update the data
+        onReorder?.(newData);
+      }
+
+      resetDragState();
+    },
+    [data, onReorder, sorting]
+  );
+
+  const resetDragState = useCallback(() => {
+    setIsDragging(false);
+    setDraggedRowIndex(null);
+    setOverRowIndex(null);
+  }, []);
 
   // Create row virtualizer
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
-    getScrollElement: () => tableContainerRef.current,
+    getScrollElement: () => parentRef.current,
     estimateSize: () => rowHeight,
     overscan,
   });
@@ -75,29 +127,50 @@ export default function ThirdVirtualizedDraggableTable<
   // Get virtual rows
   const virtualRows = rowVirtualizer.getVirtualItems();
 
-  // Function to handle manual drag and drop reordering
-  const handleDragEnd = useCallback(
-    (event: React.DragEvent, rowIndex: number) => {
-      const draggedId = event.dataTransfer.getData("text/plain");
-      const draggedIndex = data.findIndex(
-        (item) => String(item.id) === draggedId
-      );
-
-      if (draggedIndex !== -1 && draggedIndex !== rowIndex) {
-        const newData = [...data];
-        const [movedItem] = newData.splice(draggedIndex, 1);
-        newData.splice(rowIndex, 0, movedItem);
-        onReorder?.(newData);
-      }
+  const onDragStart = useCallback(
+    (rowIndex: number) => (e: React.DragEvent) => {
+      e.dataTransfer.setData("text/plain", String(rows[rowIndex].original.id));
+      e.dataTransfer.effectAllowed = "move";
+      setIsDragging(true);
+      setDraggedRowIndex(rowIndex);
     },
-    [data, onReorder]
+    [rows]
   );
 
+  const onDragOver = useCallback(
+    (rowIndex: number) => (e: React.DragEvent) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      setOverRowIndex(rowIndex);
+    },
+    []
+  );
+
+  // Helper to determine row styling based on drag state
+  const getRowClassName = useCallback(
+    (rowIndex: number) => {
+      const baseClasses =
+        "group hover:bg-muted/50 transition-transform duration-200";
+
+      if (!isDragging) return baseClasses;
+
+      if (rowIndex === draggedRowIndex) {
+        return `${baseClasses} hover:bg-primary/20 hover:scale-[0.99]`;
+      }
+
+      if (rowIndex === overRowIndex) {
+        return `${baseClasses} border-dashed bg-blue-300 border-b-2 border-secondary`;
+      }
+
+      return baseClasses;
+    },
+    [isDragging, draggedRowIndex, overRowIndex]
+  );
   return (
     <div
-      ref={tableContainerRef}
-      style={{ height: "100%", overflow: "auto" }}
-      className="relative border rounded"
+      ref={parentRef}
+      style={{ overflow: "auto", contain: "strict", overflowAnchor: "none" }}
+      className="h-full relative border rounded"
     >
       <Table>
         {showHeaders && (
@@ -111,10 +184,12 @@ export default function ThirdVirtualizedDraggableTable<
                       <TableHead
                         style={{ width: header.getSize() }}
                         className={`border-b ${
-                          ableToSort ? "cursor-pointer select-none" : ""
+                          ableToSort && !isDragging
+                            ? "cursor-pointer select-none"
+                            : ""
                         }`}
                         onClick={
-                          ableToSort
+                          ableToSort && !isDragging
                             ? header.column.getToggleSortingHandler()
                             : undefined
                         }
@@ -166,17 +241,12 @@ export default function ThirdVirtualizedDraggableTable<
             return (
               <TableRow
                 key={row.id}
-                className="group hover:bg-muted/50"
+                className={getRowClassName(virtualRow.index)}
                 data-index={virtualRow.index}
-                draggable={showSortableColumn}
-                onDragStart={(e) => {
-                  e.dataTransfer.setData("text/plain", String(row.original.id));
-                  e.dataTransfer.effectAllowed = "move";
-                }}
-                onDragOver={(e) => {
-                  e.preventDefault();
-                  e.dataTransfer.dropEffect = "move";
-                }}
+                draggable={showSortableColumn && sorting.length === 0}
+                onDragStart={onDragStart(virtualRow.index)}
+                onDragOver={onDragOver(virtualRow.index)}
+                onDragEnd={resetDragState}
                 onDrop={(e) => handleDragEnd(e, virtualRow.index)}
               >
                 {row.getVisibleCells().map((cell) => (
@@ -189,7 +259,13 @@ export default function ThirdVirtualizedDraggableTable<
                 ))}
                 {showSortableColumn && (
                   <TableCell className="w-10 p-0">
-                    <div className="flex h-full w-full cursor-grab items-center justify-center">
+                    <div
+                      className={`flex h-full w-full items-center justify-center ${
+                        sorting.length === 0
+                          ? "cursor-grab"
+                          : "cursor-not-allowed opacity-50"
+                      }`}
+                    >
                       <GripVertical className="h-4 w-4 text-muted-foreground" />
                     </div>
                   </TableCell>

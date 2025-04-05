@@ -131,7 +131,7 @@ export default function App() {
       <button onClick={() => setToggle(!toggle)}>Toggle</button>
       {/* Parent container with fixed height */}
       <div className="flex-1 border rounded-md overflow-hidden">
-        <ThirdVirtualizedDraggableTable
+        <SecondDraggableVirtualTable
           columns={columns}
           data={data}
           onReorder={setData}

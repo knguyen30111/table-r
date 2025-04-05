@@ -8,7 +8,7 @@ import {
   SortingState,
   Row,
 } from "@tanstack/react-table";
-import { useVirtualizer } from "@tanstack/react-virtual";
+import { notUndefined, useVirtualizer } from "@tanstack/react-virtual";
 import {
   DndContext,
   closestCenter,
@@ -109,6 +109,7 @@ export default function SecondDraggableVirtualTable<
   showFooters = false,
   showSortableColumn = true,
 }: DraggableVirtualTableProps<T>) {
+  const parentRef = React.useRef<HTMLDivElement>(null);
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const table = useReactTable({
@@ -124,7 +125,15 @@ export default function SecondDraggableVirtualTable<
   });
 
   const { rows } = table.getRowModel();
-  const parentRef = React.useRef<HTMLDivElement>(null);
+
+  const virtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 35,
+    overscan: 20,
+  });
+
+  const virtualRows = virtualizer.getVirtualItems();
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -148,6 +157,15 @@ export default function SecondDraggableVirtualTable<
       onReorder?.(newData);
     }
   };
+
+  const [before, after] =
+    virtualRows.length > 0
+      ? [
+          notUndefined(virtualRows[0]).start - virtualizer.options.scrollMargin,
+          virtualizer.getTotalSize() -
+            notUndefined(virtualRows[virtualRows.length - 1]).end,
+        ]
+      : [0, 0];
 
   return (
     <div
@@ -216,30 +234,46 @@ export default function SecondDraggableVirtualTable<
           )}
 
           <TableBody>
+            {before > 0 && (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  style={{ height: before }}
+                />
+              </TableRow>
+            )}
             <SortableContext
               items={rows.map((row) => row.original.id)}
               strategy={verticalListSortingStrategy}
             >
-              {rows.map((row) => (
-                <SortableRow
-                  key={row.id}
-                  row={row}
-                  showSortableColumn={showSortableColumn}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell
-                      style={{ width: cell.column.getSize() }}
-                      key={cell.id}
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </SortableRow>
-              ))}
+              {virtualRows.map((virtualRow) => {
+                const row = rows[virtualRow.index];
+                return (
+                  <SortableRow
+                    key={row.id}
+                    row={row}
+                    showSortableColumn={showSortableColumn}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell
+                        style={{ width: cell.column.getSize() }}
+                        key={cell.id}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </SortableRow>
+                );
+              })}
             </SortableContext>
+            {after > 0 && (
+              <TableRow>
+                <TableCell colSpan={columns.length} style={{ height: after }} />
+              </TableRow>
+            )}
           </TableBody>
           {showFooters && (
             <TableFooter>

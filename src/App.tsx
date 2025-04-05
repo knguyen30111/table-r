@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import DraggableVirtualTable from "./Table";
 import { ColumnDef } from "@tanstack/react-table";
 import SecondDraggableVirtualTable from "./SecondTable";
+import ThirdVirtualizedDraggableTable from "./ThirdTable";
 
 // Define your data type
 type Person = {
@@ -130,7 +131,7 @@ export default function App() {
       <button onClick={() => setToggle(!toggle)}>Toggle</button>
       {/* Parent container with fixed height */}
       <div className="flex-1 border rounded-md overflow-hidden">
-        <SecondDraggableVirtualTable
+        <ThirdVirtualizedDraggableTable
           columns={columns}
           data={data}
           onReorder={setData}

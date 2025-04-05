@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import DraggableVirtualTable from "./Table";
+import SortableJsTable from "./SortableJsTable";
 import { ColumnDef } from "@tanstack/react-table";
-import SecondDraggableVirtualTable from "./SecondTable";
-import ThirdVirtualizedDraggableTable from "./ThirdTable";
-import WindowVirtualizedDraggableTable from "./VirtuosoTable";
+import DnDKitTable from "./DnDKitTable";
+import PureTable from "./PureTable";
+import VirtuosoTable from "./VirtuosoTable";
 
 // Define your data type
 type Person = {
@@ -120,7 +120,7 @@ const columns: ColumnDef<Person>[] = [
 ];
 
 export default function App() {
-  const [data, setData] = useState(generateData(50_000));
+  const [data, setData] = useState(generateData(1000));
   const [toggle, setToggle] = useState(true);
 
   return (
@@ -134,7 +134,7 @@ export default function App() {
       <button onClick={() => setToggle(!toggle)}>Toggle</button>
       {/* Parent container with fixed height */}
       <div className="flex-1 border rounded-md overflow-hidden">
-        <WindowVirtualizedDraggableTable
+        <VirtuosoTable
           columns={columns}
           data={data}
           onReorder={setData}

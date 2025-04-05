@@ -17,6 +17,8 @@ import {
   useSensor,
   useSensors,
   DragEndEvent,
+  DragOverlay,
+  TraversalOrder,
 } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -42,7 +44,11 @@ import {
   TableHeader,
   TableRow,
 } from "./components/ui/table";
-import { restrictToParentElement } from "@dnd-kit/modifiers";
+import {
+  restrictToParentElement,
+  restrictToWindowEdges,
+} from "@dnd-kit/modifiers";
+import { createPortal } from "react-dom";
 
 interface DraggableVirtualTableProps<T> {
   columns: ColumnDef<T>[];
@@ -110,6 +116,7 @@ export default function SecondDraggableVirtualTable<
   showSortableColumn = true,
 }: DraggableVirtualTableProps<T>) {
   const parentRef = React.useRef<HTMLDivElement>(null);
+  const [activeId, setActiveId] = useState<number>();
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const table = useReactTable({
@@ -129,8 +136,8 @@ export default function SecondDraggableVirtualTable<
   const virtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 35,
-    overscan: 20,
+    estimateSize: () => 40,
+    overscan: 25,
   });
 
   const virtualRows = virtualizer.getVirtualItems();
@@ -156,6 +163,7 @@ export default function SecondDraggableVirtualTable<
       newData.splice(newIndex, 0, data[oldIndex]);
       onReorder?.(newData);
     }
+    setActiveId(undefined);
   };
 
   const [before, after] =
@@ -177,7 +185,11 @@ export default function SecondDraggableVirtualTable<
         collisionDetection={closestCenter}
         modifiers={[restrictToParentElement]}
         sensors={sensors}
+        onDragStart={(params) => {
+          setActiveId(Number(params.active.id));
+        }}
         onDragEnd={handleDragEnd}
+        onDragCancel={() => setActiveId(undefined)}
       >
         <Table>
           {showHeaders && (
@@ -293,6 +305,49 @@ export default function SecondDraggableVirtualTable<
             </TableFooter>
           )}
         </Table>
+        {createPortal(
+          <DragOverlay
+            modifiers={[restrictToWindowEdges]}
+            dropAnimation={{
+              duration: 200,
+              easing: "cubic-bezier(0.18, 0.67, 0.6, 1.22)",
+            }}
+            wrapperElement="div"
+          >
+            <Table>
+              <TableBody>
+                {rows.find((row) => row.original.id === activeId) ? (
+                  <TableRow>
+                    {rows
+                      .find((row) => row.original.id === activeId)
+                      ?.getVisibleCells()
+                      .map((cell) => (
+                        <TableCell
+                          style={{
+                            width: cell.column.getSize(),
+                          }}
+                          key={cell.id}
+                        >
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </TableCell>
+                      ))}
+                    {showSortableColumn && (
+                      <TableCell style={{ width: 10 }}>
+                        <div className="flex h-full w-full cursor-grab items-center justify-center drag-handle">
+                          <GripVertical className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ) : null}
+              </TableBody>
+            </Table>
+          </DragOverlay>,
+          document.body
+        )}
       </DndContext>
     </div>
   );

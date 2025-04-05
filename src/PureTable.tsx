@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useRef,
-  useCallback,
-  useEffect,
-  ComponentProps,
-} from "react";
+import React, { useState, useRef, useCallback } from "react";
 import {
   useReactTable,
   getCoreRowModel,

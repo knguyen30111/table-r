@@ -3,7 +3,7 @@ import DraggableVirtualTable from "./Table";
 import { ColumnDef } from "@tanstack/react-table";
 import SecondDraggableVirtualTable from "./SecondTable";
 import ThirdVirtualizedDraggableTable from "./ThirdTable";
-import WindowVirtualizedDraggableTable from "./WindowTable";
+import WindowVirtualizedDraggableTable from "./VirtuosoTable";
 
 // Define your data type
 type Person = {
@@ -62,11 +62,13 @@ const columns: ColumnDef<Person>[] = [
   {
     accessorKey: "lastName",
     header: "Last Name",
+    enableSorting: true,
   },
   {
     accessorKey: "age",
     header: "Age",
     size: 80,
+    enableSorting: true,
   },
   {
     accessorKey: "visits",
@@ -118,7 +120,7 @@ const columns: ColumnDef<Person>[] = [
 ];
 
 export default function App() {
-  const [data, setData] = useState(generateData(1000));
+  const [data, setData] = useState(generateData(50_000));
   const [toggle, setToggle] = useState(true);
 
   return (

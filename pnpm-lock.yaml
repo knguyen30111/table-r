@@ -53,6 +53,12 @@ importers:
       react-sortablejs:
         specifier: ^6.1.4
         version: 6.1.4(@types/sortablejs@1.15.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sortablejs@1.15.6)
+      react-virtuoso:
+        specifier: ^4.12.6
+        version: 4.12.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      react-window:
+        specifier: ^1.8.11
+        version: 1.8.11(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       tailwind-merge:
         specifier: ^3.1.0
         version: 3.1.0
@@ -75,6 +81,9 @@ importers:
       '@types/react-dom':
         specifier: ^19.0.4
         version: 19.1.1(@types/react@19.1.0)
+      '@types/react-window':
+        specifier: ^1.8.8
+        version: 1.8.8
       '@vitejs/plugin-react':
         specifier: ^4.3.4
         version: 4.3.4(vite@6.2.5(@types/node@22.14.0)(jiti@2.4.2)(lightningcss@1.29.2))
@@ -172,6 +181,10 @@ packages:
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
+
+  '@babel/runtime@7.27.0':
+    resolution: {integrity: sha512-VtPOkrdPHZsKc/clNqyi9WUA8TINkZ4cGk63UUE3u4pmB2k+ZMQRDuIOagv8UVd6j7k0T3+RRIb7beKTebNbcw==}
+    engines: {node: '>=6.9.0'}
 
   '@babel/template@7.27.0':
     resolution: {integrity: sha512-2ncevenBqXI6qRMukPlXwHKHchC7RyMuu4xv5JBXRfOGVcTy1mXCD12qrp7Jsoxll1EV3+9sE4GugBVRjT2jFA==}
@@ -697,6 +710,9 @@ packages:
     peerDependencies:
       '@types/react': ^19.0.0
 
+  '@types/react-window@1.8.8':
+    resolution: {integrity: sha512-8Ls660bHR1AUA2kuRvVG9D/4XpRC6wjAaPT9dil7Ckc76eP9TKWZwwmgfq8Q1LANX3QNDnoU4Zp48A3w+zK69Q==}
+
   '@types/react@19.1.0':
     resolution: {integrity: sha512-UaicktuQI+9UKyA4njtDOGBD/67t8YEBt2xdfqu8+gP9hqPUPsiXlNPcpS2gVdjmis5GKPG3fCxbQLVgxsQZ8w==}
 
@@ -1144,6 +1160,9 @@ packages:
   lucide@0.487.0:
     resolution: {integrity: sha512-SJk/ANI/Qu6ieS1uZqy6ZQcEB7/oH+gVtCGrmzcvSQKJVWsGSlbR/SMTxIdqqbb1/h+eJBSVkWB7I0jGnjuOFw==}
 
+  memoize-one@5.2.1:
+    resolution: {integrity: sha512-zYiwtZUcYyXKo/np96AGZAckk+FWWsUdJ3cHGGmld7+AhvcWmQyGCYUh1hc4Q/pkOhb65dQR/pqCyK0cOaHz4Q==}
+
   merge2@1.4.1:
     resolution: {integrity: sha512-8q7VEgMJW4J8tcfVPy8g09NcQwZdbwFEqhe/WZkoIzjn/3TGDwtOCYtXGxA3O8tPzpczCCDgv+P2P5y00ZJOOg==}
     engines: {node: '>= 8'}
@@ -1236,9 +1255,25 @@ packages:
       react-dom: '>=16.9.0'
       sortablejs: '1'
 
+  react-virtuoso@4.12.6:
+    resolution: {integrity: sha512-bfvS6aCL1ehXmq39KRiz/vxznGUbtA27I5I24TYCe1DhMf84O3aVNCIwrSjYQjkJGJGzY46ihdN8WkYlemuhMQ==}
+    peerDependencies:
+      react: '>=16 || >=17 || >= 18 || >= 19'
+      react-dom: '>=16 || >=17 || >= 18 || >=19'
+
+  react-window@1.8.11:
+    resolution: {integrity: sha512-+SRbUVT2scadgFSWx+R1P754xHPEqvcfSfVX10QYg6POOz+WNgkN48pS+BtZNIMGiL1HYrSEiCkwsMS15QogEQ==}
+    engines: {node: '>8.0.0'}
+    peerDependencies:
+      react: ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+      react-dom: ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
   react@19.1.0:
     resolution: {integrity: sha512-FS+XFBNvn3GTAWq26joslQgWNoFu08F4kl0J4CgdNKADkdSGXQyTCnKteIAJy96Br6YbpEU1LSzV5dYtjMkMDg==}
     engines: {node: '>=0.10.0'}
+
+  regenerator-runtime@0.14.1:
+    resolution: {integrity: sha512-dYnhHh0nJoMfnkZs6GmmhFknAGRrLznOu5nc9ML+EJxGvrx6H7teuevqVqCuPcPK//3eDrrjQhehXVx9cnkGdw==}
 
   resolve-from@4.0.0:
     resolution: {integrity: sha512-pb/MYmXstAkysRFx8piNI1tGFNQIFA3vkE3Gq4EuA1dF6gHp/+vgZqsCGJapvy8N3Q+4o7FwvquPJcnZ7RYy4g==}
@@ -1497,6 +1532,10 @@ snapshots:
     dependencies:
       '@babel/core': 7.26.10
       '@babel/helper-plugin-utils': 7.26.5
+
+  '@babel/runtime@7.27.0':
+    dependencies:
+      regenerator-runtime: 0.14.1
 
   '@babel/template@7.27.0':
     dependencies:
@@ -1898,6 +1937,10 @@ snapshots:
       undici-types: 6.21.0
 
   '@types/react-dom@19.1.1(@types/react@19.1.0)':
+    dependencies:
+      '@types/react': 19.1.0
+
+  '@types/react-window@1.8.8':
     dependencies:
       '@types/react': 19.1.0
 
@@ -2365,6 +2408,8 @@ snapshots:
 
   lucide@0.487.0: {}
 
+  memoize-one@5.2.1: {}
+
   merge2@1.4.1: {}
 
   micromatch@4.0.8:
@@ -2445,7 +2490,21 @@ snapshots:
       sortablejs: 1.15.6
       tiny-invariant: 1.2.0
 
+  react-virtuoso@4.12.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
+    dependencies:
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+
+  react-window@1.8.11(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
+    dependencies:
+      '@babel/runtime': 7.27.0
+      memoize-one: 5.2.1
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+
   react@19.1.0: {}
+
+  regenerator-runtime@0.14.1: {}
 
   resolve-from@4.0.0: {}
 

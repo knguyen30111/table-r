@@ -18,7 +18,6 @@ import {
   useSensors,
   DragEndEvent,
   DragOverlay,
-  TraversalOrder,
 } from "@dnd-kit/core";
 import {
   SortableContext,

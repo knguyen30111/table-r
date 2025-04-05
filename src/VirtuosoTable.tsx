@@ -149,7 +149,6 @@ export default function WindowVirtualizedDraggableTable<
                 });
                 const index = props["data-index"];
                 const row = rows[index];
-                console.log({ row, index });
                 const style: React.CSSProperties = {
                   transform: CSS.Transform.toString(transform),
                   transition,
